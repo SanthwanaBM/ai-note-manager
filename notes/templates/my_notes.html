@@ -1,39 +1,385 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>My Notes</h2>
+    <style>
+        /* Table styling (from uploaded my-notes.html) */
+        .table-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 0.75rem; /* rounded-xl */
+            overflow: hidden; /* Ensures rounded corners apply to content */
+        }
+        .table-container th,
+        .table-container td {
+            padding: 1rem; /* p-4 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); /* Semi-transparent border */
+        }
+        .table-container th {
+            background-color: rgba(0, 0, 0, 0.05); /* Light header background */
+        }
 
-{% if notes %}
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>File</th>
-        <th>Summary</th>
-        <th>Glossary</th>
-        <th>Uploaded At</th>
-        <th>Quiz</th>
+        /* Modal styling (from uploaded my-notes.html) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-      </tr>
-    </thead>
-    <tbody>
-      {% for note in notes %}
-      <tr>
-        <td>{{ note.name }}</td>
-        <td>{{ note.description }}</td>
-        <td><a href="{{ note.file.url }}" target="_blank">View</a></td>
-        <td>{{ note.summary }}</td>
-        <td>{{ note.glossary }}</td>
-        <td>{{ note.uploaded_at }}</td>
-        <td style="white-space: pre-line;">{{ note.quiz }}</td>
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2.5rem; /* p-10 */
+            border-radius: 0.75rem; /* rounded-xl */
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
 
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>No notes uploaded yet.</p>
-{% endif %}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Quiz specific styling */
+        .quiz-question {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6; /* blue-500 */
+            border-radius: 0.375rem; /* rounded-md */
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.25rem; /* rounded */
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .quiz-option:hover {
+            background-color: #f3f4f6; /* gray-50 */
+        }
+        .quiz-option.correct {
+            background-color: #d1fae5; /* green-100 */
+            border-color: #34d399; /* green-400 */
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+        }
+    </style>
+
+    <main class="flex-grow w-full max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-6 text-center">My Notes</h1>
+
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
+            <div class="relative w-full md:w-1/2">
+                <input
+                    type="text"
+                    id="notes-search"
+                    placeholder="Search notes by title or description..."
+                    class="w-full py-2.5 px-4 pr-10 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    aria-label="Search notes"
+                >
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="relative w-full md:w-auto">
+                <select
+                    id="sort-by"
+                    class="block w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out appearance-none pr-8"
+                    aria-label="Sort by"
+                >
+                    <option value="uploaded_at_desc">Sort by: Newest</option>
+                    <option value="uploaded_at_asc">Sort by: Oldest</option>
+                    <option value="name_asc">Sort by: Name (A-Z)</option>
+                    <option value="name_desc">Sort by: Name (Z-A)</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {% if notes %}
+            <div class="table-container w-full overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note Title</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded At</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notes-table-body" class="bg-white divide-y divide-gray-200">
+                        {% for note in notes %}
+                            <tr class="hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer"
+                                data-id="{{ note.pk }}"
+                                data-name="{{ note.name }}"
+                                data-description="{{ note.description }}"
+                                data-file-url="{{ note.file.url }}"
+                                data-summary="{{ note.summary|escapejs }}"
+                                data-glossary="{{ note.glossary|escapejs }}"
+                                data-quiz="{{ note.quiz|escapejs }}" {# Assuming note.quiz is JSON string #}
+                                data-uploaded-at="{{ note.uploaded_at|date:'Y-m-d H:i:s' }}"
+                            >
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ note.name }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ note.description|truncatechars:50 }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ note.uploaded_at|date:"M d, Y H:i" }}</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="showNoteDetails(this)" class="text-blue-600 hover:text-blue-900 mr-3">View Details</button>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-gray-600 mt-8">No notes uploaded yet. <a href="{% url 'upload_note' %}" class="text-blue-600 hover:underline">Upload a new note</a> to get started!</p>
+        {% endif %}
+    </main>
+
+    <div id="note-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="modal-close-button">&times;</span>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4" id="modal-note-title"></h3>
+
+            <div class="space-y-6">
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Summary</h4>
+                    <p id="modal-summary" class="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-200"></p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Glossary</h4>
+                    <p id="modal-glossary" class="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-md border border-gray-200"></p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Original File</h4>
+                    <p class="text-gray-700">
+                        <a id="modal-file-link" href="#" target="_blank" class="text-blue-600 hover:underline">View Original File</a>
+                    </p>
+                </div>
+
+                <div id="modal-quiz-section" class="hidden">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3">Quiz</h4>
+                    <div id="quiz-questions-container" class="space-y-4">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data passed from Django template to JavaScript
+        const initialNotesData = [
+          {% for note in notes %}
+            {
+                pk: "{{ note.pk }}",
+                name: "{{ note.name|escapejs }}",
+                description: "{{ note.description|escapejs }}",
+                file_url: "{{ note.file.url }}",
+                summary: `{{ note.summary|escapejs }}`,
+                glossary: `{{ note.glossary|escapejs }}`,
+                quiz: `{{ note.quiz|escapejs }}`, // Assuming note.quiz is a JSON string
+                uploaded_at: "{{ note.uploaded_at|date:'Y-m-d H:i:s' }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          ];
+
+        let currentNotesData = [...initialNotesData]; // Mutable copy for filtering/sorting
+
+        // Function to populate the notes table
+        function populateNotesTable(notesToDisplay) {
+            const tableBody = document.getElementById('notes-table-body');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (notesToDisplay.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center text-sm text-gray-500">No matching notes found.</td></tr>`;
+                return;
+            }
+
+            notesToDisplay.forEach(note => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer';
+                row.setAttribute('data-id', note.pk);
+                row.setAttribute('data-name', note.name);
+                row.setAttribute('data-description', note.description);
+                row.setAttribute('data-file-url', note.file_url);
+                row.setAttribute('data-summary', note.summary);
+                row.setAttribute('data-glossary', note.glossary);
+                row.setAttribute('data-quiz', note.quiz);
+                row.setAttribute('data-uploaded-at', note.uploaded_at);
+
+                const uploadedAtFormatted = new Date(note.uploaded_at).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${note.name}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${note.description.length > 50 ? note.description.substring(0, 47) + '...' : note.description}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${uploadedAtFormatted}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="showNoteDetails(this)" class="text-blue-600 hover:text-blue-900 mr-3">View Details</button>
+                        <a href="/notes/delete/${note.pk}/" class="text-red-600 hover:text-red-900">Delete</a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to search notes
+        function searchNotes() {
+            const searchTerm = document.getElementById('notes-search').value.toLowerCase();
+            const filteredNotes = initialNotesData.filter(note =>
+                note.name.toLowerCase().includes(searchTerm) ||
+                note.description.toLowerCase().includes(searchTerm)
+            );
+            currentNotesData = filteredNotes; // Update current data for sorting
+            applySortAndPopulate();
+        }
+
+        // Function to sort notes
+        function sortNotes() {
+            const sortBy = document.getElementById('sort-by').value;
+            let sortedNotes = [...currentNotesData]; // Work with the currently filtered data
+
+            sortedNotes.sort((a, b) => {
+                if (sortBy === 'uploaded_at_desc') {
+                    return new Date(b.uploaded_at) - new Date(a.uploaded_at);
+                } else if (sortBy === 'uploaded_at_asc') {
+                    return new Date(a.uploaded_at) - new Date(b.uploaded_at);
+                } else if (sortBy === 'name_asc') {
+                    return a.name.localeCompare(b.name);
+                } else if (sortBy === 'name_desc') {
+                    return b.name.localeCompare(a.name);
+                }
+                return 0;
+            });
+            populateNotesTable(sortedNotes);
+        }
+
+        // Apply search and sort, then populate
+        function applySortAndPopulate() {
+            searchNotes(); // First filter
+            sortNotes();   // Then sort
+        }
+
+        // Show note details modal
+        function showNoteDetails(buttonElement) {
+            const row = buttonElement.closest('tr');
+            const modal = document.getElementById('note-details-modal');
+            const modalTitle = document.getElementById('modal-note-title');
+            const modalSummary = document.getElementById('modal-summary');
+            const modalGlossary = document.getElementById('modal-glossary');
+            const modalFileLink = document.getElementById('modal-file-link');
+            const modalQuizSection = document.getElementById('modal-quiz-section');
+            const quizQuestionsContainer = document.getElementById('quiz-questions-container');
+
+            modalTitle.textContent = row.dataset.name;
+            modalSummary.textContent = row.dataset.summary;
+            modalGlossary.textContent = row.dataset.glossary;
+            modalFileLink.href = row.dataset.fileUrl;
+
+            // Handle Quiz
+            quizQuestionsContainer.innerHTML = ''; // Clear previous quiz
+            let quizData = null;
+            try {
+                // Attempt to parse quiz data as JSON
+                quizData = JSON.parse(row.dataset.quiz);
+            } catch (e) {
+                console.error("Error parsing quiz JSON:", e);
+                // If parsing fails, treat it as plain text or an empty quiz
+            }
+
+            if (quizData && quizData.questions && quizData.questions.length > 0) {
+                modalQuizSection.classList.remove('hidden');
+                quizData.questions.forEach((q, qIndex) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'quiz-question';
+                    questionDiv.innerHTML = `
+                        <p class="font-semibold text-gray-800 mb-2">${qIndex + 1}. ${q.question}</p>
+                        <div class="space-y-2">
+                            ${q.options.map((option, oIndex) => `
+                                <div class="quiz-option">
+                                    <span class="font-medium mr-2">${String.fromCharCode(65 + oIndex)}.</span>
+                                    <span>${option}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="text-sm text-green-600 mt-2">Correct Answer: ${q.correctAnswer}</p>
+                    `;
+                    quizQuestionsContainer.appendChild(questionDiv);
+                });
+            } else {
+                modalQuizSection.classList.add('hidden'); // Hide if no quiz data or parsing failed
+            }
+
+            modal.style.display = 'flex'; // Show the modal
+        }
+
+        // Hide note details modal
+        function hideNoteDetails() {
+            document.getElementById('note-details-modal').style.display = 'none';
+        }
+
+        // Event listeners for modal close button and overlay
+        document.getElementById('modal-close-button').addEventListener('click', hideNoteDetails);
+        document.getElementById('note-details-modal').addEventListener('click', (event) => {
+            if (event.target.id === 'note-details-modal') { // Only close if clicking the overlay, not the content
+                hideNoteDetails();
+            }
+        });
+
+        // Initial population of the table and event listeners on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            populateNotesTable(initialNotesData); // Populate with all notes initially
+
+            // Add event listeners for search and sort
+            document.getElementById('notes-search').addEventListener('input', searchNotes);
+            document.getElementById('sort-by').addEventListener('change', sortNotes);
+        });
+    </script>
 {% endblock %}

@@ -1,10 +1,147 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Register</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+<main class="flex-grow flex items-center justify-center py-12 px-4">
+    <div class="form-card p-8 md:p-10 rounded-3xl shadow-xl w-full max-w-md border border-gray-100">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Create Your Account</h2>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">{{ form.username.label }}</label>
+                <input
+                    type="text"
+                    id="{{ form.username.id_for_label }}"
+                    name="{{ form.username.name }}"
+                    maxlength="150"
+                    pattern="[a-zA-Z0-9@/\\+]+"
+                    class="block w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    placeholder="Choose a username"
+                    aria-label="Username"
+                    value="{{ form.username.value|default_if_none:'' }}"
+                    required
+                >
+                <p class="mt-1 text-xs text-gray-500">Max 150 characters. Letters, digits, and @/+/./- only.</p>
+                {% for error in form.username.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <label for="{{ form.email.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">{{ form.email.label }}</label>
+                <input
+                    type="email"
+                    id="{{ form.email.id_for_label }}"
+                    name="{{ form.email.name }}"
+                    class="block w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    placeholder="Enter your email"
+                    aria-label="Email"
+                    value="{{ form.email.value|default_if_none:'' }}"
+                    required
+                >
+                {% for error in form.email.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="relative">
+                <label for="{{ form.password1.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">{{ form.password1.label }}</label>
+                <input
+                    type="password"
+                    id="{{ form.password1.id_for_label }}"
+                    name="{{ form.password1.name }}"
+                    class="block w-full py-2.5 px-4 pr-10 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    placeholder="Create a password"
+                    aria-label="Password"
+                    required
+                >
+                <button type="button" id="togglePasswordVisibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-7">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="eye-open-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path id="eye-closed-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.875A10.05 10.05 0 0112 20.25c-4.478 0-8.268-2.943-9.542-7.25a1.002 1.002 0 010-1.5C3.732 7.943 7.523 5 12 5c1.157 0 2.26 0.236 3.275 0.675M17.5 13.5a3 3 0 11-6 0 3 3 0 016 0zm-6 6a9.001 9.001 0 003.875-1.125m-3.875 1.125l-2.875-2.875m7.75-7.75L21.5 12"></path>
+                    </svg>
+                </button>
+                <ul class="mt-1 text-xs text-gray-500 list-disc pl-5 space-y-0.5">
+                    <li>Your password can't be too similar to your personal information.</li>
+                    <li>Must contain at least 8 characters.</li>
+                    <li>Can't be a commonly used password.</li>
+                    <li>Can't be entirely numeric.</li>
+                </ul>
+                {% for error in form.password1.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="relative">
+                <label for="{{ form.password2.id_for_label }}" class="block text-gray-700 text-sm font-medium mb-2">{{ form.password2.label }}</label>
+                <input
+                    type="password"
+                    id="{{ form.password2.id_for_label }}"
+                    name="{{ form.password2.name }}"
+                    class="block w-full py-2.5 px-4 pr-10 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    placeholder="Confirm your password"
+                    aria-label="Password Confirmation"
+                    required
+                >
+                <button type="button" id="togglePasswordConfirmVisibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-7">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path id="eye-open-confirm-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path id="eye-closed-confirm-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.875A10.05 10.05 0 0112 20.25c-4.478 0-8.268-2.943-9.542-7.25a1.002 1.002 0 010-1.5C3.732 7.943 7.523 5 12 5c1.157 0 2.26 0.236 3.275 0.675M17.5 13.5a3 3 0 11-6 0 3 3 0 016 0zm-6 6a9.001 9.001 0 003.875-1.125m-3.875 1.125l-2.875-2.875m7.75-7.75L21.5 12"></path>
+                    </svg>
+                </button>
+                {% for error in form.password2.errors %}
+                    <p class="text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full transition duration-200 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg"
+                    aria-label="Create an Account"
+                >
+                    Create an Account
+                </button>
+            </div>
+        </form>
+
+        <p class="text-center text-sm text-gray-600 mt-6">
+            Already have an account?
+            <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-800 hover:underline transition duration-200 ease-in-out">Please login</a>
+        </p>
+    </div>
+</main>
+
+<script>
+    // Function to toggle password visibility
+    function setupPasswordToggle(inputId, toggleButtonId, eyeOpenIconId, eyeClosedIconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleButton = document.getElementById(toggleButtonId);
+        const eyeOpenIcon = document.getElementById(eyeOpenIconId);
+        const eyeClosedIcon = document.getElementById(eyeClosedIconId);
+
+        if (toggleButton) {
+            toggleButton.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeOpenIcon.classList.add('hidden');
+                    eyeClosedIcon.classList.remove('hidden');
+                } else {
+                    passwordInput.type = 'password';
+                    eyeOpenIcon.classList.remove('hidden');
+                    eyeClosedIcon.classList.add('hidden');
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Setup toggle for Password field
+        setupPasswordToggle('{{ form.password1.id_for_label }}', 'togglePasswordVisibility', 'eye-open-icon', 'eye-closed-icon');
+
+        // Setup toggle for Password Confirmation field
+        setupPasswordToggle('{{ form.password2.id_for_label }}', 'togglePasswordConfirmVisibility', 'eye-open-confirm-icon', 'eye-closed-confirm-icon');
+    });
+</script>
 {% endblock %}

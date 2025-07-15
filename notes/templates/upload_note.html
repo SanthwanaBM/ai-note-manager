@@ -1,10 +1,92 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Upload Note</h2>
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Upload</button>
-</form>
+<main class="flex-grow flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div class="form-card p-8 md:p-10 lg:p-12 rounded-3xl w-full max-w-lg text-center">
+        <div class="flex justify-center mb-6">
+            <svg class="w-16 h-16 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+        </div>
+
+        <h2 class="text-3xl font-bold text-gray-900 mb-2 leading-tight">Upload Your Note</h2>
+        <p class="text-gray-600 mb-8 text-base">Effortlessly transform your documents into concise summaries.</p>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            <div class="relative">
+                <label for="{{ form.name.id_for_label }}" class="sr-only">{{ form.name.label }}</label>
+                <input
+                    type="text"
+                    id="{{ form.name.id_for_label }}"
+                    name="{{ form.name.name }}"
+                    class="block w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400"
+                    placeholder="Note Title"
+                    value="{{ form.name.value|default_if_none:'' }}"
+                    {% if form.name.field.required %}required{% endif %}
+                >
+                {% if form.name.errors %}
+                    <p class="text-sm text-red-600 text-left mt-1">{{ form.name.errors.as_text }}</p>
+                {% endif %}
+            </div>
+
+            <div class="relative">
+                <label for="{{ form.description.id_for_label }}" class="sr-only">{{ form.description.label }}</label>
+                <textarea
+                    id="{{ form.description.id_for_label }}"
+                    name="{{ form.description.name }}"
+                    rows="3"
+                    class="block w-full py-2.5 px-4 border border-gray-300 rounded-lg text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out placeholder-gray-400 resize-y"
+                    placeholder="Brief description of your note..."
+                    {% if form.description.field.required %}required{% endif %}
+                >{{ form.description.value|default_if_none:'' }}</textarea>
+                {% if form.description.errors %}
+                    <p class="text-sm text-red-600 text-left mt-1">{{ form.description.errors.as_text }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700 text-left mb-1">{{ form.file.label }}</label>
+                <input
+                    type="file"
+                    id="{{ form.file.id_for_label }}"
+                    name="{{ form.file.name }}"
+                    class="block w-full text-sm text-gray-800
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-500 file:text-white
+                        hover:file:bg-blue-600 file:cursor-pointer
+                        file:transition file:duration-200 file:ease-in-out
+                        hover:file:bg-blue-100"
+                    aria-label="Upload File"
+                    {% if form.file.field.required %}required{% endif %}
+                >
+                <p class="mt-1 text-sm text-gray-500 text-left" id="file_input_help">PDF, DOCX, TXT (MAX. 5MB).</p>
+                {% if form.file.errors %}
+                    <p class="text-sm text-red-600 text-left mt-1">{{ form.file.errors.as_text }}</p>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="text-sm text-red-600 text-left">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div>
+                <button
+                    type="submit"
+                    class="block bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 w-full text-center transition duration-200 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg"
+                    aria-label="Upload Note"
+                >
+                    Upload Note
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
 {% endblock %}

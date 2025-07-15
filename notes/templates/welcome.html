@@ -1,37 +1,164 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Welcome, {{ user.username }}!</h2>
-<p>Current Time: {{ time_now }}</p>
+    <section class="w-full max-w-6xl mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row items-center md:items-start justify-between">
+            <div class="flex flex-col items-center md:items-start mb-4 md:mb-0">
+                <div class="flex items-center mb-2">
+                    <div id="greeting-icon" class="w-12 h-12 mr-3 text-yellow-500">
+                        </div>
+                    <h2 id="greeting-message" class="text-3xl font-extrabold text-gray-900"></h2>
+                </div>
+                <p id="current-time" class="text-lg text-gray-600"></p>
+            </div>
+            <div class="flex flex-col items-center md:items-end">
+                <div id="current-date-calendar" class="calendar-date mb-2">
+                    </div>
+            </div>
+        </div>
+    </section>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>Upload Notes</h5>
-            <a href="{% url 'upload_note' %}" class="btn btn-primary mt-2">Upload</a>
-        </div>
+    <div class="w-full max-w-6xl mx-auto px-4 mb-8">
+        <hr class="border-t border-gray-200">
     </div>
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>My Notes</h5>
-            <a href="{% url 'my_notes' %}" class="btn btn-primary mt-2">View Notes</a>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>Upload Voice Note</h5>
-            <a href="{% url 'upload_voice_note' %}" class="btn btn-primary mt-2">Upload</a>
-        </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card p-3">
-            <h5>My Voice Notes</h5>
-            <a href="{% url 'my_voice_notes' %}" class="btn btn-primary mt-2">View Voice Notes</a>
-        </div>
-    </div>
-</div>
+    <main class="flex-grow flex flex-col items-center justify-center py-8 px-4">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-8 text-center">Your AI Note Dashboard</h2>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+
+            <a href="{% url 'my_notes' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">My Notes</h3>
+                    <p class="text-sm text-gray-600">View and manage all your summarized notes.</p>
+                </div>
+            </a>
+
+            <a href="{% url 'upload_note' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">Upload Notes</h3>
+                    <p class="text-sm text-gray-600">Upload new text documents for summarization.</p>
+                </div>
+            </a>
+
+            <a href="{% url 'upload_voice_note' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">Upload Voice Note</h3>
+                    <p class="text-sm text-gray-600">Convert your voice recordings into summarized text.</p>
+                </div>
+            </a>
+
+            <a href="{% url 'my_voice_notes' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 2v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">My Voice Notes</h3>
+                    <p class="text-sm text-gray-600">Access and review your transcribed voice notes.</p>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <script>
+        // Function to get greeting based on time of day
+        function getGreeting() {
+            const hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) return "Good morning";
+            if (hour >= 12 && hour < 18) return "Good afternoon";
+            if (hour >= 18 && hour < 22) return "Good evening";
+            return "Good night"; // 10 PM to 4:59 AM
+        }
+
+        // Function to get appropriate icon based on time of day
+        function getGreetingIconSVG() {
+            const hour = new Date().getHours();
+            let iconPath = "";
+            let iconColor = "";
+
+            if (hour >= 5 && hour < 12) { // Morning
+                iconPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.364 6.364l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>'; // Sun
+                iconColor = "text-yellow-500";
+            } else if (hour >= 12 && hour < 18) { // Afternoon
+                iconPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.364 6.364l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>'; // Sun
+                iconColor = "text-yellow-600"; // Slightly darker yellow for afternoon
+            } else if (hour >= 18 && hour < 22) { // Evening
+                iconPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3.053a7.001 7.001 0 008.38 8.38z"></path>'; // Moon
+                iconColor = "text-indigo-500";
+            } else { // Night
+                iconPath = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12.79A9 9 0 1111.21 3.053a7.001 7.001 0 008.38 8.38zM12 18h.01M12 15h.01M12 12h.01M12 9h.01M12 6h.01M12 3h.01M12 21h.01"></path>'; // Moon with stars
+                iconColor = "text-indigo-700";
+            }
+            return `<svg class="w-full h-full ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg>`;
+        }
+
+
+        // Function to format date like a calendar
+        function getFormattedDateParts() {
+            const date = new Date();
+            const optionsDayOfWeek = { weekday: 'short' };
+            const optionsMonth = { month: 'short' };
+            const day = date.getDate();
+            const year = date.getFullYear();
+
+            const dayOfWeek = date.toLocaleDateString(undefined, optionsDayOfWeek);
+            const month = date.toLocaleDateString(undefined, optionsMonth);
+
+            return { dayOfWeek, month, day, year };
+        }
+
+        // Function to format time
+        function getFormattedTime() {
+            const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+            return new Date().toLocaleTimeString(undefined, options);
+        }
+
+        // Update the greeting, date, and time on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = "{{ request.user.username|default:'Guest' }}"; // Use Django user for dynamic name
+            const greetingElement = document.getElementById('greeting-message');
+            const greetingIconElement = document.getElementById('greeting-icon');
+            const dateCalendarElement = document.getElementById('current-date-calendar');
+            const timeElement = document.getElementById('current-time');
+            const userInitialElement = document.getElementById('user-initial');
+
+            // Update greeting message and icon
+            greetingElement.textContent = `${getGreeting()}, ${userName}!`;
+            greetingIconElement.innerHTML = getGreetingIconSVG();
+
+            // Update calendar date
+            const dateParts = getFormattedDateParts();
+            dateCalendarElement.innerHTML = `
+                <span class="day-of-week">${dateParts.dayOfWeek}</span>
+                <span class="month-day">${dateParts.month} ${dateParts.day}</span>
+                <span class="year">${dateParts.year}</span>
+            `;
+
+            // Update time
+            timeElement.textContent = getFormattedTime();
+
+            // Update user initial in header
+            if (userInitialElement) {
+                 userInitialElement.textContent = userName.charAt(0).toUpperCase();
+            }
+        });
+    </script>
 {% endblock %}
