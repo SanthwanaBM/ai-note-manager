@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>My Notes</h2>
+
+{% if notes %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>File</th>
+        <th>Summary</th>
+        <th>Glossary</th>
+        <th>Uploaded At</th>
+        <th>Quiz</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for note in notes %}
+      <tr>
+        <td>{{ note.name }}</td>
+        <td>{{ note.description }}</td>
+        <td><a href="{{ note.file.url }}" target="_blank">View</a></td>
+        <td>{{ note.summary }}</td>
+        <td>{{ note.glossary }}</td>
+        <td>{{ note.uploaded_at }}</td>
+        <td style="white-space: pre-line;">{{ note.quiz }}</td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No notes uploaded yet.</p>
+{% endif %}
+
+{% endblock %}

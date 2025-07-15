@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>My Voice Notes</h2>
+
+{% if voices %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>About</th>
+                <th>File</th>
+                <th>Converted Text</th>
+                <th>Uploaded At</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for voice in voices %}
+            <tr>
+                <td>{{ voice.name }}</td>
+                <td>{{ voice.about }}</td>
+                <td><a href="{{ voice.file.url }}" target="_blank">Play</a></td>
+                <td>{{ voice.converted_text }}</td>
+                <td>{{ voice.uploaded_at }}</td>
+                <td style="white-space: pre-line;">{{ voice.converted_text }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No voice notes uploaded yet.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Welcome, {{ user.username }}!</h2>
+<p>Current Time: {{ time_now }}</p>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Upload Notes</h5>
+            <a href="{% url 'upload_note' %}" class="btn btn-primary mt-2">Upload</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>My Notes</h5>
+            <a href="{% url 'my_notes' %}" class="btn btn-primary mt-2">View Notes</a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>Upload Voice Note</h5>
+            <a href="{% url 'upload_voice_note' %}" class="btn btn-primary mt-2">Upload</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5>My Voice Notes</h5>
+            <a href="{% url 'my_voice_notes' %}" class="btn btn-primary mt-2">View Voice Notes</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
