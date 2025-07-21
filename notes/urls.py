@@ -10,4 +10,6 @@ urlpatterns = [
     path('my_notes/', views.my_notes_view, name='my_notes'),
     path('upload_voice_note/', views.upload_voice_note_view, name='upload_voice_note'),
     path('my_voice_notes/', views.my_voice_notes_view, name='my_voice_notes'),
+    path('schedule_lecture/', views.schedule_lecture_view, name='schedule_lecture'),
+    path('my_lectures/', views.my_lectures_view, name='my_lectures'),
 ]

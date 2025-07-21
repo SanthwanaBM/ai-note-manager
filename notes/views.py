@@ -9,12 +9,12 @@ from django.utils import timezone
 from .forms import RegisterForm, NoteForm, VoiceNoteForm
 from .models import Note, VoiceNote
 from django.contrib.auth.decorators import login_required
-
 from .utils import extract_text_from_file, generate_summary, extract_glossary, generate_quiz
 from .utils import convert_voice_to_text
-
-
 import os
+from .models import Lecture
+from .forms import LectureForm
+from datetime import timedelta
 
 
 # User Registration
@@ -142,3 +142,33 @@ def upload_voice_note_view(request):
 def my_voice_notes_view(request):
     voices = VoiceNote.objects.filter(user=request.user)
     return render(request, 'my_voice_notes.html', {'voices': voices})
+
+
+
+@login_required
+def schedule_lecture_view(request):
+    if request.method == 'POST':
+        form = LectureForm(request.POST)
+        if form.is_valid():
+            lecture = form.save(commit=False)
+            lecture.user = request.user
+            lecture.save()
+            return redirect('my_lectures')
+    else:
+        form = LectureForm()
+    return render(request, 'schedule_lecture.html', {'form': form})
+
+
+
+@login_required
+def my_lectures_view(request):
+    now = timezone.now()
+    reminder_window = now + timedelta(hours=24)
+
+    lectures = Lecture.objects.filter(user=request.user).order_by('scheduled_at')
+
+    return render(request, 'my_lectures.html', {
+        'lectures': lectures,
+        'now': now,
+        'reminder_window': reminder_window
+    })
