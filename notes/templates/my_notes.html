@@ -143,7 +143,8 @@
         </div>
 
         {% if notes %}
-            <div class="table-container w-full overflow-x-auto">
+            <div class="table-container w-full max-w-full overflow-x-auto text-sm">
+
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -170,7 +171,8 @@
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ note.uploaded_at|date:"M d, Y H:i" }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
                                     <button onclick="showNoteDetails(this)" class="text-blue-600 hover:text-blue-900 mr-3">View Details</button>
-                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                    <a href="{% url 'delete_note' note.pk %}" class="text-red-600 hover:text-red-900">Delete</a>
+
                                 </td>
                             </tr>
                         {% endfor %}
@@ -278,7 +280,7 @@
                 note.description.toLowerCase().includes(searchTerm)
             );
             currentNotesData = filteredNotes; // Update current data for sorting
-            applySortAndPopulate();
+            sortNotes();
         }
 
         // Function to sort notes

@@ -1,7 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -15,6 +11,12 @@ import os
 from .models import Lecture
 from .forms import LectureForm
 from datetime import timedelta
+import json
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.timesince import timeuntil
+
 
 
 # User Registration
@@ -95,7 +97,8 @@ def upload_note_view(request):
                 quiz_text = generate_quiz(summary)
 
             print("👉 Generated Quiz Questions:", quiz_text)
-            note.quiz = quiz_text
+          
+            note.quiz = json.dumps(quiz_text)
             note.save()
 
             return redirect('my_notes')
@@ -162,13 +165,47 @@ def schedule_lecture_view(request):
 
 @login_required
 def my_lectures_view(request):
-    now = timezone.now()
+    now = timezone.localtime()
+    print(f"DEBUG: Current local time (now): {now}") # Add this
     reminder_window = now + timedelta(hours=24)
 
     lectures = Lecture.objects.filter(user=request.user).order_by('scheduled_at')
 
+    completed_count = lectures.filter(scheduled_at__lt=now).count()
+    total = lectures.count()
+
+    for lecture in lectures:
+        print(f"DEBUG: Processing lecture: '{lecture.title}' scheduled at {lecture.scheduled_at}") # Add this
+        time_diff = timeuntil(lecture.scheduled_at, now)
+        if lecture.scheduled_at < now:
+            lecture.remaining_time = "Already started"
+        else:
+            lecture.remaining_time = time_diff
+        print(f"DEBUG: Calculated remaining_time: {lecture.remaining_time}") # Add this
+
+    completed_percent = round((completed_count / total) * 100) if total else 0
+
     return render(request, 'my_lectures.html', {
         'lectures': lectures,
         'now': now,
-        'reminder_window': reminder_window
+        'reminder_window': reminder_window,
+        'completed_count': completed_count,
+        'upcoming_count': total - completed_count, # Corrected upcoming_count
+        'completed_percent': completed_percent,
     })
+
+
+
+@login_required
+def delete_voice_note_view(request, pk):
+    voice_note = get_object_or_404(VoiceNote, pk=pk, user=request.user)
+    voice_note.delete()
+    return redirect('my_voice_notes')  # or use: return HttpResponseRedirect(reverse('my_voice_notes'))
+
+
+
+@login_required
+def delete_note_view(request, note_id):
+    note = get_object_or_404(Note, pk=note_id, user=request.user)
+    note.delete()
+    return redirect('my_notes')

@@ -75,6 +75,33 @@
                 </div>
             </a>
 
+            <a href="{% url 'my_lectures' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 20h9m0 0V8a2 2 0 00-2-2H9.414a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 005.586 3H3a1 1 0 00-1 1v14a2 2 0 002 2h8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">My Lectures</h3>
+                    <p class="text-sm text-gray-600">View and manage your uploaded lecture notes.</p>
+                </div>
+            </a>
+
+            <a href="{% url 'schedule_lecture' %}" class="block">
+                <div class="dashboard-card p-5 rounded-xl text-center transform transition-transform duration-200 hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="flex justify-center mb-3">
+                        <svg class="w-14 h-14 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">Scheduled Lectures</h3>
+                    <p class="text-sm text-gray-600">View and manage your upcoming lecture schedules.</p>
+                </div>
+            </a>
+
+
+
+
         </div>
     </main>
 

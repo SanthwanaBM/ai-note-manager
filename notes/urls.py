@@ -12,4 +12,8 @@ urlpatterns = [
     path('my_voice_notes/', views.my_voice_notes_view, name='my_voice_notes'),
     path('schedule_lecture/', views.schedule_lecture_view, name='schedule_lecture'),
     path('my_lectures/', views.my_lectures_view, name='my_lectures'),
+    path('voice_notes/delete/<int:pk>/', views.delete_voice_note_view, name='delete_voice_note'),
+    path('notes/delete/<int:note_id>/', views.delete_note_view, name='delete_note'),
+
+
 ]

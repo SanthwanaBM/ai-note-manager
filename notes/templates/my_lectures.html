@@ -1,37 +1,72 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2 class="text-2xl font-bold mb-4">My Scheduled Lectures</h2>
 
 {% if lectures %}
-<ul class="space-y-4">
-    {% for lecture in lectures %}
-        {% if lecture.scheduled_at < now %}
-            <li class="p-4 rounded-lg shadow bg-red-100 border-l-4 border-red-500">
-                <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
-                <p class="text-gray-600">{{ lecture.description }}</p>
-                <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
-                <p class="text-red-700 font-semibold">⏰ This session has already passed.</p>
-            </li>
+    <!-- Filter Dropdown -->
+    <form method="get" class="mb-6 flex items-center gap-2">
+        <label for="filter" class="font-medium text-gray-700">Filter:</label>
+        <div class="relative">
+            <select name="filter" id="filter"
+                class="px-3 py-2 pr-8 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none bg-white"
+                onchange="this.form.submit()">
+                <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
+                <option value="upcoming" {% if filter_type == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                <option value="completed" {% if filter_type == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+            <!-- Arrow Icon -->
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </div>
+    </form>
 
-        {% elif lecture.scheduled_at <= reminder_window %}
-            <li class="p-4 rounded-lg shadow bg-yellow-100 border-l-4 border-yellow-500">
-                <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
-                <p class="text-gray-600">{{ lecture.description }}</p>
-                <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
-                <p class="text-yellow-700 font-semibold">🔔 Reminder: Starts within 24 hours!</p>
-            </li>
+    <!-- Progress Tracker -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">📊 Lecture Progress</h3>
+        <div class="w-full bg-gray-200 rounded-full h-4">
+            <div class="bg-green-500 h-4 rounded-full transition-all duration-300"
+                 style="width: {{ completed_percent }}%;"></div>
+        </div>
+        <p class="text-sm mt-2 text-gray-700">
+            {{ completed_count }} of {{ lectures.count }} lectures completed ({{ completed_percent }}%)
+        </p>
+    </div>
 
-        {% else %}
-            <li class="p-4 rounded-lg shadow bg-green-100 border-l-4 border-green-500">
-                <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
-                <p class="text-gray-600">{{ lecture.description }}</p>
-                <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
-                <p class="text-green-700 font-medium">🟢 Upcoming</p>
-            </li>
-        {% endif %}
-    {% endfor %}
-</ul>
+    <!-- Lecture Cards -->
+    <ul class="space-y-4">
+        {% for lecture in lectures %}
+            {% if lecture.scheduled_at < now %}
+                <li class="p-4 rounded-lg shadow bg-red-100 border-l-4 border-red-500">
+                    <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
+                    <p class="text-gray-600">{{ lecture.description }}</p>
+                    <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
+                    <p class="text-red-700 font-semibold">⏰ This session has already passed.</p>
+                </li>
+
+            {% elif lecture.scheduled_at <= reminder_window %}
+                <li class="p-4 rounded-lg shadow bg-yellow-100 border-l-4 border-yellow-500">
+                    <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
+                    <p class="text-gray-600">{{ lecture.description }}</p>
+                    <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
+                    <p class="text-yellow-700 font-semibold">🔔Starts in {{ lecture.remaining_time }}</p>
+                </li>
+
+            {% else %}
+                <li class="p-4 rounded-lg shadow bg-green-100 border-l-4 border-green-500">
+                    <h3 class="text-lg font-semibold">{{ lecture.title }}</h3>
+                    <p class="text-gray-600">{{ lecture.description }}</p>
+                    <p class="text-sm text-gray-500">📅 Scheduled at: {{ lecture.scheduled_at }}</p>
+                    <p class="text-green-700 font-medium">🟢 Upcoming</p>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
 {% else %}
-<p>No lectures scheduled yet.</p>
+    <p>No lectures scheduled yet.</p>
 {% endif %}
 {% endblock %}

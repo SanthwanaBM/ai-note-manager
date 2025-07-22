@@ -42,6 +42,8 @@ class Lecture(models.Model):
     description = models.TextField(blank=True)
     scheduled_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+    reminder_sent = models.BooleanField(default=False)  
+
 
     def __str__(self):
         return f"{self.title} on {self.scheduled_at.strftime('%Y-%m-%d %H:%M')}"

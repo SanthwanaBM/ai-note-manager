@@ -3,6 +3,7 @@ import docx
 import pdfplumber
 import spacy
 import random
+import json
 import speech_recognition as sr
 from pydub import AudioSegment
 
@@ -28,10 +29,10 @@ def extract_text_from_file(file_path):
 def generate_summary(text):
     if len(text) < 50:
         return "Text too short to summarize."
-    if len(text) > 2000:
+    if len(text) > 4000:
         return "Note too large to summarize. Please upload a smaller file or split it."
 
-    result = summarizer(text, max_length=150, min_length=50, do_sample=False)
+    result = summarizer(text, max_length=200, min_length=50, do_sample=False)
     return result[0]['summary_text']
 
 
@@ -59,34 +60,57 @@ def extract_glossary(text, num_terms=10):
 
 
 
-def generate_quiz(summary_text, num_questions=3):
+
+def generate_quiz(summary_text, num_questions=10):
     if not summary_text or len(summary_text) < 50:
-        return "Not enough content to generate quiz."
+        return {"questions": []}
 
     sentences = [s.strip() for s in summary_text.split('.') if len(s.strip()) > 20]
     if not sentences:
-        return "No suitable sentences found for quiz."
+        return {"questions": []}
 
     questions = []
+    used_sentences = set()
+
     for _ in range(min(num_questions, len(sentences))):
         sentence = random.choice(sentences)
+
+        if sentence in used_sentences:
+            continue
+        used_sentences.add(sentence)
+
         words = sentence.split()
-
         if len(words) < 5:
-            continue  # skip short ones
+            continue
 
-        # Randomly blank out a non-trivial word
-        index = random.randint(1, len(words)-2)
+        index = random.randint(1, len(words) - 2)
         answer = words[index]
-        words[index] = '____'
 
+        # Skip very common or punctuation-heavy words
+        if not answer.isalpha() or answer.lower() in {"the", "and", "but", "with", "have"}:
+            continue
+
+        words[index] = "____"
         question = ' '.join(words)
-        questions.append(f"{question}  [Answer: {answer}]")
 
-    if not questions:
-        return "No suitable quiz questions generated."
+        # Generate distractors (random words from other sentences)
+        distractors = set()
+        all_words = [w for s in sentences for w in s.split() if w.isalpha() and w.lower() != answer.lower()]
+        while len(distractors) < 3 and all_words:
+            distractor = random.choice(all_words)
+            if distractor.lower() != answer.lower():
+                distractors.add(distractor)
 
-    return "\n\n".join(questions)
+        options = list(distractors) + [answer]
+        random.shuffle(options)
+
+        questions.append({
+            "question": question,
+            "options": options,
+            "correctAnswer": answer
+        })
+
+    return {"questions": questions}
 
 
 
