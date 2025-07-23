@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <h2 class="text-3xl font-bold mb-4">📘 Study Planner</h2>
+
+    <!-- Progress Bar -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-2">Progress Tracker</h3>
+        <div class="w-full bg-gray-200 rounded-full h-4">
+            <div class="bg-blue-500 h-4 rounded-full transition-all duration-300" style="width: {{ progress_percent }}%;"></div>
+        </div>
+        <p class="text-sm mt-2 text-gray-700">{{ completed_tasks }} of {{ total_tasks }} tasks completed ({{ progress_percent }}%)</p>
+    </div>
+
+    <!-- Task Filter -->
+    <div class="flex justify-between items-center mb-4">
+        <form method="GET">
+            <select name="status" onchange="this.form.submit()" class="px-3 py-1 rounded border border-gray-300">
+                <option value="">All Tasks</option>
+                <option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option>
+                <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+            </select>
+        </form>
+        <a href="{% url 'add_study_task' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">+ Add Task</a>
+    </div>
+
+    <!-- Task List -->
+    <ul class="space-y-4">
+        {% for task in tasks %}
+        <li class="p-4 bg-white shadow rounded border-l-4 {% if task.completed %}border-green-500{% else %}border-yellow-400{% endif %}">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="text-lg font-semibold">{{ task.title }}</h4>
+                    <p class="text-sm text-gray-600">Due: {{ task.due_date }}</p>
+                    {% if task.notes %}
+                    <p class="text-sm text-gray-700 mt-1">{{ task.notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="space-x-2">
+                    <a href="{% url 'edit_study_task' task.id %}" class="text-blue-500 hover:underline">Edit</a>
+                    <a href="{% url 'toggle_task_status' task.id %}" class="text-indigo-500 hover:underline">
+                        {% if task.completed %}Mark Pending{% else %}Mark Complete{% endif %}
+                    </a>
+                    <a href="{% url 'delete_study_task' task.id %}" class="text-red-500 hover:underline">Delete</a>
+                </div>
+            </div>
+        </li>
+        {% empty %}
+        <li class="text-gray-500">No study tasks found.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

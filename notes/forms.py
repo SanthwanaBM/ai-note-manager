@@ -2,8 +2,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Note, VoiceNote
-
 from .models import Lecture
+from .models import StudyTask
+
+
 
 # User Registration Form
 class RegisterForm(UserCreationForm):
@@ -25,8 +27,6 @@ class VoiceNoteForm(forms.ModelForm):
         model = VoiceNote
         fields = ['name', 'about', 'file']
 
-from django import forms
-from .models import Lecture
 
 class LectureForm(forms.ModelForm):
     class Meta:
@@ -34,4 +34,15 @@ class LectureForm(forms.ModelForm):
         fields = ['title', 'description', 'scheduled_at']
         widgets = {
             'scheduled_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        }
+
+
+
+class StudyTaskForm(forms.ModelForm):
+    class Meta:
+        model = StudyTask
+        fields = ['title', 'due_date', 'notes']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
         }

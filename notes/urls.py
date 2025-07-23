@@ -15,5 +15,13 @@ urlpatterns = [
     path('voice_notes/delete/<int:pk>/', views.delete_voice_note_view, name='delete_voice_note'),
     path('notes/delete/<int:note_id>/', views.delete_note_view, name='delete_note'),
 
+    path('study_planner/', views.study_planner_view, name='study_planner'),
+    path('add_study_task/', views.add_study_task, name='add_study_task'),
+    path('edit_study_task/<int:pk>/', views.edit_study_task, name='edit_study_task'),
+    path('toggle_task_status/<int:pk>/', views.toggle_task_status, name='toggle_task_status'),
+    path('delete_study_task/<int:pk>/', views.delete_study_task, name='delete_study_task'),
+
+
+
 
 ]

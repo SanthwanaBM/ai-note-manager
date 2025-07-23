@@ -16,6 +16,10 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.timesince import timeuntil
+from .models import StudyTask
+from .forms import StudyTaskForm
+
+
 
 
 
@@ -209,3 +213,67 @@ def delete_note_view(request, note_id):
     note = get_object_or_404(Note, pk=note_id, user=request.user)
     note.delete()
     return redirect('my_notes')
+
+from .models import StudyTask
+from .forms import StudyTaskForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+
+@login_required
+def study_planner_view(request):
+    tasks = StudyTask.objects.filter(user=request.user).order_by('due_date')
+    total = tasks.count()
+    completed = tasks.filter(completed=True).count()
+    percent = round((completed / total) * 100) if total > 0 else 0
+
+    status = request.GET.get('status')
+    if status == "completed":
+        tasks = tasks.filter(completed=True)
+    elif status == "pending":
+        tasks = tasks.filter(completed=False)
+
+    return render(request, 'study_planner.html', {
+        'tasks': tasks,
+        'completed_tasks': completed,
+        'total_tasks': total,
+        'progress_percent': percent,
+        'status': status,
+    })
+
+@login_required
+def add_study_task(request):
+    if request.method == 'POST':
+        form = StudyTaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect('study_planner')
+    else:
+        form = StudyTaskForm()
+    return render(request, 'study_task_form.html', {'form': form, 'form_title': 'Add New Study Task'})
+
+@login_required
+def edit_study_task(request, pk):
+    task = get_object_or_404(StudyTask, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = StudyTaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('study_planner')
+    else:
+        form = StudyTaskForm(instance=task)
+    return render(request, 'study_task_form.html', {'form': form, 'form_title': 'Edit Study Task'})
+
+@login_required
+def toggle_task_status(request, pk):
+    task = get_object_or_404(StudyTask, pk=pk, user=request.user)
+    task.completed = not task.completed
+    task.save()
+    return redirect('study_planner')
+
+@login_required
+def delete_study_task(request, pk):
+    task = get_object_or_404(StudyTask, pk=pk, user=request.user)
+    task.delete()
+    return redirect('study_planner')

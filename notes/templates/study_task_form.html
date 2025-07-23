@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto py-10">
+    <h2 class="text-2xl font-bold mb-6">{{ form_title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="space-y-4">
+            <div>
+                <label class="block mb-1 font-medium">Task Title</label>
+                {{ form.title }}
+            </div>
+            <div>
+                <label class="block mb-1 font-medium">Due Date</label>
+                {{ form.due_date }}
+            </div>
+            <div>
+                <label class="block mb-1 font-medium">Additional Notes</label>
+                {{ form.notes }}
+            </div>
+        </div>
+        <div class="mt-6">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Task</button>
+            <a href="{% url 'study_planner' %}" class="ml-4 text-gray-600 hover:underline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
