@@ -167,36 +167,49 @@ def schedule_lecture_view(request):
 
 
 
+
+
 @login_required
 def my_lectures_view(request):
-    now = timezone.localtime()
-    print(f"DEBUG: Current local time (now): {now}") # Add this
+    now = timezone.now()
     reminder_window = now + timedelta(hours=24)
 
-    lectures = Lecture.objects.filter(user=request.user).order_by('scheduled_at')
+    filter_option = request.GET.get('filter', 'all')
+
+    lectures = Lecture.objects.filter(user=request.user)
+
+    if filter_option == 'upcoming':
+        lectures = lectures.filter(scheduled_at__gte=now)
+    elif filter_option == 'completed':
+        lectures = lectures.filter(scheduled_at__lt=now)
 
     completed_count = lectures.filter(scheduled_at__lt=now).count()
+    upcoming_count = lectures.filter(scheduled_at__gte=now).count()
     total = lectures.count()
+    completed_percent = round((completed_count / total) * 100) if total > 0 else 0
 
+    # Annotate remaining time for upcoming lectures
     for lecture in lectures:
-        print(f"DEBUG: Processing lecture: '{lecture.title}' scheduled at {lecture.scheduled_at}") # Add this
-        time_diff = timeuntil(lecture.scheduled_at, now)
-        if lecture.scheduled_at < now:
-            lecture.remaining_time = "Already started"
+        if lecture.scheduled_at > now:
+            delta = lecture.scheduled_at - now
+            total_minutes = int(delta.total_seconds() / 60)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            lecture.remaining_time = f"{hours} hours, {minutes} minutes"
         else:
-            lecture.remaining_time = time_diff
-        print(f"DEBUG: Calculated remaining_time: {lecture.remaining_time}") # Add this
-
-    completed_percent = round((completed_count / total) * 100) if total else 0
+            lecture.remaining_time = None
 
     return render(request, 'my_lectures.html', {
         'lectures': lectures,
         'now': now,
         'reminder_window': reminder_window,
         'completed_count': completed_count,
-        'upcoming_count': total - completed_count, # Corrected upcoming_count
+        'upcoming_count': upcoming_count,
         'completed_percent': completed_percent,
+        'selected_filter': filter_option
     })
+
+
 
 
 
