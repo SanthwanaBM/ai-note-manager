@@ -60,5 +60,10 @@ class StudyTask(models.Model):
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    
+
     def __str__(self):
         return self.title
+    
+   
+    

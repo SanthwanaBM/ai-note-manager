@@ -39,7 +39,7 @@
                 <div class="space-x-2">
                     <a href="{% url 'edit_study_task' task.id %}" class="text-blue-500 hover:underline">Edit</a>
                     <a href="{% url 'toggle_task_status' task.id %}" class="text-indigo-500 hover:underline">
-                        {% if task.completed %}Mark Pending{% else %}Mark Complete{% endif %}
+                        {% if task.completed %}Mark Complete{% else %}Mark Pending{% endif %}
                     </a>
                     <a href="{% url 'delete_study_task' task.id %}" class="text-red-500 hover:underline">Delete</a>
                 </div>

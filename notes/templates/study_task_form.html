@@ -18,6 +18,11 @@
                 {{ form.notes }}
             </div>
         </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-1" for="id_tag">Tag</label>
+             {{ form.tag }}
+        </div>
+
         <div class="mt-6">
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Task</button>
             <a href="{% url 'study_planner' %}" class="ml-4 text-gray-600 hover:underline">Cancel</a>

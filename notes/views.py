@@ -232,18 +232,24 @@ from .forms import StudyTaskForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
+
 @login_required
 def study_planner_view(request):
-    tasks = StudyTask.objects.filter(user=request.user).order_by('due_date')
-    total = tasks.count()
-    completed = tasks.filter(completed=True).count()
+    status = request.GET.get('status', '')
+
+    # Get all tasks first for correct progress calculation
+    all_tasks = StudyTask.objects.filter(user=request.user)
+    total = all_tasks.count()
+    completed = all_tasks.filter(completed=True).count()
     percent = round((completed / total) * 100) if total > 0 else 0
 
-    status = request.GET.get('status')
+    # Now apply status filter for display
     if status == "completed":
-        tasks = tasks.filter(completed=True)
+        tasks = all_tasks.filter(completed=True)
     elif status == "pending":
-        tasks = tasks.filter(completed=False)
+        tasks = all_tasks.filter(completed=False)
+    else:
+        tasks = all_tasks.order_by('due_date')
 
     return render(request, 'study_planner.html', {
         'tasks': tasks,
@@ -252,6 +258,7 @@ def study_planner_view(request):
         'progress_percent': percent,
         'status': status,
     })
+
 
 @login_required
 def add_study_task(request):
